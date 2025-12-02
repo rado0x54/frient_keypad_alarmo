@@ -25,6 +25,14 @@ blueprint:
           description:
             "This is the same as your State Topic, with the addition of /set.\n
             Example: zigbee2mqtt/Keypad/set"
+        allow_arm_without_code:
+          name: Allow Arming Without Code
+          description:
+            "When enabled, arming actions (away, home, night) can be performed
+            without entering a PIN on the keypad."
+          default: false
+          selector:
+            boolean:
         pin_list:
           name: Keypad Pincode List
           description:
@@ -169,6 +177,7 @@ blueprint:
 variables:
   pin_list_var: !input pin_list
   pin_list: "{{ pin_list_var.split(';') | map('trim') | reject('equalto', '') | list }}"
+  allow_arm_without_code: !input allow_arm_without_code
   custom_pincode_1: !input custom_pincode_1
   custom_pincode_2: !input custom_pincode_2
   custom_pincode_3: !input custom_pincode_3
@@ -287,8 +296,7 @@ actions:
               - conditions:
                   - condition: template
                     value_template:
-                      '{{ trigger.payload_json.action_code in pin_list and trigger.payload_json.action
-                      == "arm_all_zones" }}'
+                      "{{ (trigger.payload_json.action_code in pin_list\n                          or (allow_arm_without_code and (trigger.payload_json.action_code | default('''') | string | length == 0)))\n                         and trigger.payload_json.action == 'arm_all_zones' }}"
                 sequence:
                   - action: alarm_control_panel.alarm_arm_away
                     target:
@@ -298,8 +306,7 @@ actions:
               - conditions:
                   - condition: template
                     value_template:
-                      '{{ trigger.payload_json.action_code in pin_list and trigger.payload_json.action
-                      == "arm_day_zones" }}'
+                      "{{ (trigger.payload_json.action_code in pin_list\n                          or (allow_arm_without_code and (trigger.payload_json.action_code | default('''') | string | length == 0)))\n                         and trigger.payload_json.action == 'arm_day_zones' }}"
                 sequence:
                   - action: alarm_control_panel.alarm_arm_home
                     target:
@@ -309,8 +316,7 @@ actions:
               - conditions:
                   - condition: template
                     value_template:
-                      '{{ trigger.payload_json.action_code in pin_list and trigger.payload_json.action
-                      == "arm_night_zones" }}'
+                      "{{ (trigger.payload_json.action_code in pin_list\n                          or (allow_arm_without_code and (trigger.payload_json.action_code | default('''') | string | length == 0)))\n                         and trigger.payload_json.action == 'arm_night_zones' }}"
                 sequence:
                   - action: alarm_control_panel.alarm_arm_night
                     target:
@@ -350,7 +356,8 @@ actions:
                   - condition: template
                     value_template:
                       "{{ trigger.payload_json.action_code not in pin_list and trigger.payload_json.action_code not in pin_actions_list and
-                      trigger.payload_json.action_code | int(-1) != -1 }}"
+                      trigger.payload_json.action_code | int(-1) != -1 and
+                      not (allow_arm_without_code and (trigger.payload_json.action_code | default('') | string | length == 0)) }}"
                 sequence:
                   - action: mqtt.publish
                     data:
