@@ -3,6 +3,8 @@
 
 This project provides an automation to link a **Frient Keypad** to the **Alarmo** module in Home Assistant. It enables seamless communication between the keypad and Home Assistant’s Alarm Control Panel, offering advanced functionality for home security management.
 
+> Forked from https://github.com/Bygood91/frient_keypad_alarmo and adapted for additional reliability and flexibility.
+
 ## Features
 
 - **Arm All Zones**: Activate all zones with the **Lock** button.  
@@ -15,6 +17,13 @@ This project provides an automation to link a **Frient Keypad** to the **Alarmo*
 - **Invalid Code**: Flashes an orange light when an incorrect PIN or RFID tag is used.  
 - **Alarm in Progress**: Flashes a red light when the alarm is active.  
 - **RFID**: Support for multiple PIN codes and RFID tags.
+
+## Fork Changes
+- Added missing `armed_home` state trigger so the keypad stops blinking and confirms arm-home.
+- Trimmed and cleaned PIN lists to avoid errors with spaces or empty entries.
+- Custom action PIN checks now require exact, non-empty matches to prevent false triggers.
+- Optional “Allow Arming Without Code” toggle to permit arming with no PIN entry.
+- Added MIT license and `.gitignore` for IDE files.
 
 ### RFID Tips:
 - Use tools like [NFC Tools](https://play.google.com/store/apps/details?id=com.wakdev.wdnfc&hl=en&gl=US) (on Android) to read your RFID tags. Simply copy the tag ID (preceded by `+`) into the list of allowed PIN codes.  
